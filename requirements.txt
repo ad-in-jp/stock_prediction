@@ -4,4 +4,4 @@ numpy
 opencv-python-headless
 matplotlib
 gunicorn
-tensorflow-cpu==2.15.0
+tensorflow-cpu
