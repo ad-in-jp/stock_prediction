@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Stock Predictor</title>
+    <style>
+        /* CSSでデザインを整える */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --bg-color: #ecf0f1;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 400px;
+            text-align: center;
+        }
+
+        h1 { color: var(--primary-color); margin-bottom: 1.5rem; }
+
+        .input-group { margin-bottom: 1.5rem; }
+
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus { border-color: var(--accent-color); }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover { transform: scale(1.05); background-color: #2980b9; }
+
+        #result-area {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 10px;
+            display: none; /* 最初は隠しておく */
+        }
+
+        .prediction-val { font-size: 2rem; font-weight: bold; color: var(--success-color); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📈 株価AI予測</h1>
+        <div class="input-group">
+            <p>銘柄コードを入力（例: AAPL, 4250.T）</p>
+            <input type="text" id="tickerInput" placeholder="Ticker Symbol">
+        </div>
+        <button class="btn" onclick="predict()">予測を開始</button>
+
+        <div id="result-area">
+            <p><span id="displayTicker"></span> の判定結果</p>
+            <div class="prediction-val" id="predictionText">--</div>
+            <p id="confidenceText">確信度: --%</p>
+        </div>
+    </div>
+
+    <script>
+        // JavaScriptでボタンクリック時の動きを作る
+    async function predict() {
+    const ticker = document.getElementById('tickerInput').value;
+    if(!ticker) return;
+
+    // ボタンを無効化して「解析中...」にする
+    document.getElementById('result-area').style.display = 'block';
+    document.getElementById('predictionText').innerText = "解析中...";
+
+    // Pythonサーバー(app.py)へリクエストを送信
+    const response = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticker: ticker })
+    });
+
+    const result = await response.json();
+
+    if(result.error) {
+        alert(result.error);
+    } else {
+        // 結果を画面に反映
+        document.getElementById('displayTicker').innerText = result.ticker;
+        document.getElementById('predictionText').innerText = result.prediction;
+        document.getElementById('confidenceText').innerText = "確信度: " + result.confidence + "%";
+    }
+}
+        }
+    </script>
+</body>
+</html>
